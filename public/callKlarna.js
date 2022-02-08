@@ -46,8 +46,7 @@ window.klarnaAsyncCallback = function (client_token) {
                 container: "#klarna_container",
                 payment_method_categories: payments.split(','),
                 // payment_method_categories: ["pay_later", "pay_over_time"],
-                instance_id: "klarna-payments-instance",
-                show_form: true,
+                instance_id: "klarna-payments-instance"
             }, { // data
             },
             // callback
@@ -73,7 +72,7 @@ let klarnaAuth = function () {
                 instance_id: "klarna-payments-instance" // Same as instance_id set in Klarna.Payments.load().
             },
             // { 
-            // data
+            // //data
             // billing_address: {
             //     given_name: "John",
             //     family_name: "Doe",
