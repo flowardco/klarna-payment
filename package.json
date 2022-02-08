@@ -4,7 +4,8 @@
   "description": "Send payment request with Node",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon nodeAPI.js"
+    "start": "nodemon nodeAPI.js",
+    "start-docker": "node nodeAPI.js"
   },
   "author": "",
   "license": "ISC",
