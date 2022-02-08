@@ -1,25 +1,38 @@
-
 // KLARNA:
-let promiseKlarna = new Promise((resolve, reject) => {
-    let client_token
-    $.post("/klarnaSession/", {},
-        function (data, status) {
-            console.log('data here',data);
-            client_token = data.client_token
-            console.log("\nClient Token:\n" + client_token);
-            if (client_token)
-                resolve(client_token)
-        })
-}).then((client_token) => {
-    console.log("\nKlarna...\n");
-    window.klarnaAsyncCallback(client_token)
-});
+// let promiseKlarna = new Promise((resolve, reject) => {
+//     let client_token
+//     $.post("/klarnaSession/", {},
+//         function (data, status) {
+//             console.log('data here', data);
+//             client_token = data.client_token
+//             console.log("\nClient Token:\n" + client_token);
+//             if (client_token)
+//                 resolve(client_token)
+//         })
+// }).then((client_token) => {
+//     console.log("\nKlarna...\n");
+//     window.klarnaAsyncCallback(client_token)
+// });
+
+function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+
+let token = getParameterByName('token')
+let payments = getParameterByName('payments')
+let order = getParameterByName('order')
+
 
 window.klarnaAsyncCallback = function (client_token) {
-    console.log("\nKlarna Init token...\n" + client_token);
     // INIT
     try {
-        console.log("\nKlarna Init...\n");
+        //console.log("\nKlarna Init...\n");
         Klarna.Payments.init({
             client_token: client_token
         });
@@ -29,13 +42,14 @@ window.klarnaAsyncCallback = function (client_token) {
     //LOAD...
     try {
         console.log("\nKlarna load...\n");
-        Klarna.Payments.load(
-            {
+        Klarna.Payments.load({
                 container: "#klarna_container",
-                payment_method_categories: ["pay_later", "pay_over_time"],
-                instance_id: "klarna-payments-instance"
-            }, {// data
-        },
+                payment_method_categories: payments.split(','),
+                // payment_method_categories: ["pay_later", "pay_over_time"],
+                instance_id: "klarna-payments-instance",
+                show_form: true,
+            }, { // data
+            },
             // callback
             function (response) {
                 console.log("Load Success:\n")
@@ -47,6 +61,9 @@ window.klarnaAsyncCallback = function (client_token) {
     }
 };
 
+window.klarnaAsyncCallback(token)
+
+
 // AUTHORISE
 let klarnaAuth = function () {
     try {
@@ -54,28 +71,30 @@ let klarnaAuth = function () {
             // options
             {
                 instance_id: "klarna-payments-instance" // Same as instance_id set in Klarna.Payments.load().
-            }, {// data
-            billing_address: {
-                given_name: "John",
-                family_name: "Doe",
-                email: "johndoe@email.com",
-                title: "Mr",
-                street_address: "13 New Burlington St",
-                street_address2: "Apt 214",
-                postal_code: "W13 3BG",
-                city: "London",
-                region: "",
-                phone: "01895808221",
-                country: "GB"
-            }
-        },
+            },
+            // { 
+            // data
+            // billing_address: {
+            //     given_name: "John",
+            //     family_name: "Doe",
+            //     email: "johndoe@email.com",
+            //     title: "Mr",
+            //     street_address: "13 New Burlington St",
+            //     street_address2: "Apt 214",
+            //     postal_code: "W13 3BG",
+            //     city: "London",
+            //     region: "",
+            //     phone: "01895808221",
+            //     country: "GB"
+            // }
+            // },
             function (response) {
                 console.log("Authorise Success:\n")
                 console.log(response)
                 console.log("Response token: " + response.authorization_token)
                 $.post("/klarnaPayment/", {
-                    authorization_token: response.authorization_token
-                },
+                        authorization_token: response.authorization_token
+                    },
                     function (data, status) {
                         console.log("Payment Successful\n");
                         console.log(data);
